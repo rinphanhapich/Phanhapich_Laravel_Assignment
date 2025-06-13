@@ -75,17 +75,17 @@ class BookController extends Controller
     }
 
     //Delete a book by its ID.
-    public function delete(int $id)
-{
-    foreach ($this->books as $book) {
-        if ($book['id'] === $id) {
-            return response()->json([
-                'message' => 'Book deleted successfully'
-            ], 200);
+        public function delete(int $id)
+    {
+        foreach ($this->books as $book) {
+            if ($book['id'] === $id) {
+                return response()->json([
+                    'message' => 'Book deleted successfully'
+                ], 200);
+            }
         }
+        return response()->json([
+            'message' => 'Book not found'
+        ], 404);
     }
-    return response()->json([
-        'message' => 'Book not found'
-    ], 404);
-}
 }
