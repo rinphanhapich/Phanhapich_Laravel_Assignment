@@ -4,88 +4,61 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use App\Models\Book;
+
 class BookController extends Controller
 {
-    public $books = [
-         ['id' => 1, 'title' => 'Tom tav', 'author' => 'Yok team', 'year' => 1999],
-        ['id' => 2, 'title' => 'The watcher', 'author' => 'Harper Lee', 'year' => 2000],
-        ['id' => 3, 'title' => 'The rain foreast', 'author' => 'F. Scott Fitzgerald', 'year' => 1925],
-    ];
-
-
-    // Retrieve a list of all books.
-    public function index(){
-        return response()->json([
-            'message' => 'Books fetched successfully',
-            'data' => $this->books
-        ], 200);
+    // Get all books
+    public function index()
+    {
+        $books = Book::all();
+        return response()->json(['message' => 'Books fetched successfully', 'data' => $books], 200);
     }
 
-    //Retrieve a single book by its ID.
-    public function show(int $id)
+    // Get book by ID
+    public function show($id)
     {
-        foreach ($this->books as $book){
-            if ($book['id'] === $id) {
-                return response()->json([
-                    'message' => 'Book fetched successfully',
-                    'data' => $book
-                ], 200);
-            }
+        $book = Book::find($id);
+        if (!$book) {
+            return response()->json(['message' => 'Book not found'], 404);
         }
-        return response()->json([
-            'message' => 'Book not found',
-        ], 404);
+        return response()->json(['message' => 'Book fetched successfully', 'data' => $book], 200);
     }
 
-    //Add a new book.
-    public function create (Request $request)
+    // Create a new book
+    public function create(Request $request)
     {
-         $newBook = [
-            'id' => count($this->books) + 1,
-            'title' => $request->title,
-            'author' => $request->author,
-            'year' => $request->year,
-        ];
-        $this->books[] = $newBook;
-        return response()->json([
-            'message' => 'Book created successfully',
-            'data' => $newBook
-        ], 201);
+        $request->validate([
+            'title' => 'required',
+            'author' => 'required',
+            'year' => 'required|integer',
+        ]);
+
+        $book = Book::create($request->all());
+        return response()->json(['message' => 'Book created successfully', 'data' => $book], 201);
     }
 
-    //Update an existing book by its ID.
-     public function edit(Request $request, int $id)
+    // Update book
+    public function edit(Request $request, $id)
     {
-        foreach ($this->books as &$book) {
-            if ($book['id'] === $id) {
-                $book['title'] = $request->title ?? $book['title'];
-                $book['author'] = $request->author ?? $book['author'];
-                $book['year'] = $request->year ?? $book['year'];
-
-                return response()->json([
-                    'message' => 'Book updated successfully',
-                    'data' => $book
-                ], 200);
-            }
+        $book = Book::find($id);
+        if (!$book) {
+            return response()->json(['message' => 'Book not found'], 404);
         }
 
-        return response()->json([
-            'message' => 'Book not found'
-        ], 404);
+        $book->update($request->all());
+        return response()->json(['message' => 'Book updated successfully', 'data' => $book], 200);
     }
 
-    //Delete a book by its ID.
-        public function delete(int $id)
+    // Delete book
+    public function delete($id)
     {
-        foreach ($this->books as $book) {
-            if ($book['id'] === $id) {
-                return response()->json([
-                    'message' => 'Book deleted successfully'
-                ], 200);
-            }
+        $book = Book::find($id);
+        if (!$book) {
+            return response()->json(['message' => 'Book not found'], 404);
         }
-        return response()->json([
-            'message' => 'Book not found'
-        ], 404);
+
+        $book->delete();
+        return response()->json(['message' => 'Book deleted successfully'], 200);
     }
 }
